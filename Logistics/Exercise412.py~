@@ -1,0 +1,182 @@
+import numpy as np
+import pandas as pd
+import seaborn as sns; sns.set()
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+import patsy
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix
+from sklearn import preprocessing
+from sklearn import datasets
+from IPython.display import display, HTML
+
+def confusion_table(confusion_mtx):
+    """Renders a nice confusion table with labels"""
+    confusion_df = pd.DataFrame({'y_pred=0': np.append(confusion_mtx[:, 0], confusion_mtx.sum(axis=0)[0]),
+                                 'y_pred=1': np.append(confusion_mtx[:, 1], confusion_mtx.sum(axis=0)[1]),
+                                 'Total': np.append(confusion_mtx.sum(axis=1), ''),
+                                 '': ['y=0', 'y=1', 'Total']}).set_index('')
+    return confusion_df
+# Classifier stats                                                                                                                                                                                          
+# -------------------------------------------------                                                                                                                                                         
+
+def prior_error_rate(confusion_matrix):
+    """The prior probability that a result is positive"""
+    return 1 - (np.sum(confusion_mtx[1, :]) / np.sum(confusion_mtx))
+
+def total_error_rate(confusion_matrix):
+    """Derive total error rate from confusion matrix"""
+    return 1 - np.trace(confusion_mtx) / np.sum(confusion_mtx)
+
+def true_positive_rate(confusion_mtx):
+    """or sensitivity: the proportion of actual POSITIVES that are correctly identified as such"""
+    return confusion_mtx[1, 1] / np.sum(confusion_mtx[1, :])
+def false_negative_rate(confusion_mtx):
+    """the proportion of actual POSITIVES that are incorrectly identified as negative"""
+    return confusion_mtx[1, 0] / np.sum(confusion_mtx[1, :])
+
+def false_positive_rate(confusion_mtx):
+    """the proportion of actual NEGATIVES that are incorrectly identified as positives"""
+    return confusion_mtx[0, 1] / np.sum(confusion_mtx[0, :])
+
+def true_negative_rate(confusion_mtx):
+    """or specificity: the proportion of actual NEGATIVES that are correctly identified as such"""
+    return confusion_mtx[0, 0] / np.sum(confusion_mtx[0, :])
+
+def positive_predictive_value(confusion_mtx):
+    """or precision: the proportion of predicted positives that are correctly predicted"""
+    return confusion_mtx[1, 1] / np.sum(confusion_mtx[:, 1])
+
+def negative_predictive_value(confusion_mtx):
+    """the proportion of predicted negatives that are correctly predicted"""
+    return confusion_mtx[0, 0] / np.sum(confusion_mtx[:, 0])
+
+def classifier_stats(confusion_mtx):
+    return pd.Series({'prior_error_rate': prior_error_rate(confusion_mtx),
+                      'total_error_rate': total_error_rate(confusion_mtx),
+                      'true_positive_rate (sensitivity)': true_positive_rate(confusion_mtx),
+                      'false_negative_rate': false_negative_rate(confusion_mtx),
+                      'false_positive_rate': false_positive_rate(confusion_mtx),
+                      'true_negative_rate (specificity)': true_negative_rate(confusion_mtx),
+                      'positive_predictive_value (precision)': positive_predictive_value(confusion_mtx),
+                      'negative_predictive_value': negative_predictive_value(confusion_mtx)})
+
+auto_df = pd.read_csv('../auto.csv')
+
+# Remove missing values
+auto_df = auto_df.drop(auto_df[auto_df.values == '?'].index)
+auto_df = auto_df.reset_index()
+
+# Convert quantitive datatypes to numerics
+datatypes = {'quant': ['mpg', 'cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'year', 'origin'],
+             'qual': ['name']}
+
+quants = auto_df[datatypes['quant']].astype(np.float_)
+auto_df = pd.concat([quants, auto_df[datatypes['qual']]], axis=1) 
+
+# Add mpg01 feature
+mpg01   = (auto_df['mpg'] > auto_df['mpg'].median()).astype(np.float64)
+auto_df = pd.concat([auto_df, mpg01.rename('mpg01')], axis=1).drop('mpg', axis=1)
+auto_df.head()
+
+display(auto_df.head())
+sns.pairplot(auto_df)
+plt.savefig(r"Auto_correlation_matrix.pdf")
+plt.clf()
+for c in auto_df.columns.drop(['mpg01', 'name']):
+    sns.boxplot(x=auto_df['mpg01'], y=auto_df[c])
+#    plt.show();
+# Create index for training set
+np.random.seed(1)
+train = np.random.rand(len(auto_df)) < 0.7
+
+# Training set (70%)
+display(HTML('<h3>Training set</h3>'))
+display(auto_df[train].head())
+
+# Test set (30%)
+display(HTML('<h3>Test set</h3>'))
+display(auto_df[~train].head())
+
+
+# Create index for training set
+np.random.seed(1)
+train_idx = np.random.rand(len(auto_df)) < 0.7
+auto_df_train = auto_df[train_idx]
+auto_df_test  = auto_df[~train_idx]
+
+# Create index for holdout set
+np.random.seed(1)
+train = np.random.rand(len(auto_df)) < 0.7
+
+predictors  = ['weight', 'cylinders', 'year', 'acceleration']
+#predictors  = auto_df.columns.drop(['mpg01', 'name'])
+X_train = np.array(auto_df[train][predictors])
+y_train = np.array(auto_df[train]['mpg01'])
+X_test  = np.array(auto_df[~train][predictors])
+y_test  = np.array(auto_df[~train]['mpg01'])
+
+
+# MODELS
+# Logistic Regression
+#model_logit = sm.Logit(y_train, X_train).fit() <--- this technique didn't converge
+logit       = LogisticRegression()
+model_logit = logit.fit(X_train, y_train)
+# LDA
+lda         = LinearDiscriminantAnalysis()
+model_lda   = lda.fit(X_train, y_train)
+# QDA
+qda         = QuadraticDiscriminantAnalysis()
+model_qda   = qda.fit(X_train, y_train)
+
+models = {'logit': model_logit, 
+          'lda': model_lda, 
+          'qda': model_qda}
+scaled = []
+
+
+# PREDICT
+for k in models:
+    # Predict
+    if k in scaled:
+        y_pred = models[k].predict(preprocessing.scale(X_test))
+    else:
+        y_pred = models[k].predict(X_test)
+    # Confusion table
+    display(HTML('<h3>{}</h3>'.format(k)))
+    confusion_mtx = confusion_matrix(y_test, y_pred)
+    display(confusion_table(confusion_mtx))
+    # Classifier stats
+    display(classifier_stats(confusion_mtx))
+
+
+# Create index for holdout set
+np.random.seed(1)
+train = np.random.rand(len(auto_df)) < 0.7
+
+predictors  = ['weight', 'cylinders', 'year', 'acceleration']
+#predictors  = auto_df.columns.drop(['mpg01', 'name'])
+X_train = np.array(auto_df[train][predictors])
+y_train = np.array(auto_df[train]['mpg01'])
+X_test  = np.array(auto_df[~train][predictors])
+y_test  = np.array(auto_df[~train]['mpg01'])
+
+
+
+# PREDICT
+for K in range(1, 21):
+    # model
+    model = KNeighborsClassifier(n_neighbors=K).fit(preprocessing.scale(X_train), y_train)
+    # Predict
+    y_pred = model.predict(preprocessing.scale(X_test))
+    
+    # Confusion table
+    display(HTML('<h3>K={}</h3>'.format(K)))
+    confusion_mtx = confusion_matrix(y_test, y_pred)
+    display(confusion_table(confusion_mtx))
+    
+    # Classifier stats
+    print('total_error_rate: \n' + str(classifier_stats(confusion_mtx)['total_error_rate']))
