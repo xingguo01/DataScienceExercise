@@ -3,8 +3,6 @@
 """
 CS224N 2021-2022: Homework 3
 parser_model.py: Feed-Forward Neural Network for Dependency Parsing
-Sahil Chopra <schopra8@stanford.edu>
-Haoshen Hong <haoshen@stanford.edu>
 """
 import argparse
 import numpy as np

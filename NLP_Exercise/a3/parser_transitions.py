@@ -3,8 +3,7 @@
 """
 CS224N 2021-2022: Homework 3
 parser_transitions.py: Algorithms for completing partial parsess.
-Sahil Chopra <schopra8@stanford.edu>
-Haoshen Hong <haoshen@stanford.edu>
+
 """
 
 import sys
