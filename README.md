@@ -8,6 +8,7 @@
   - NLP with machine learning (CS224N) [exercise](https://github.com/xingguo01/DataScienceExercise/tree/main/NLP_Exercise) using neural networks, LSTMs and transformer architecture for various NLP tasks.
   - [LLM from stratch](https://github.com/xingguo01/LLMs-from-scratch), engineered a chatbot from scratch and fine-tuned pre-trained GPT models for text identification.
   - [Natural Languge Processing with Transformers](https://github.com/xingguo01/notebooks) Developed skills in building, debugging, and optimising transformer models for core NLP tasks such as text classification, named entity recognition, and question answering. Applied transformers for cross-lingual transfer learning and real-world scenarios with limited labeled data.
+  - [Knowledge graphs for RAG using Neo4j](https://github.com/xingguo01/DataScienceExercise/tree/main/KnowledgeGraph_neo4j): Developed proficiency in using Neo4j's Cypher query language to manage and retrieve data from knowledge graphs. Built a question-answering system by integrating Neo4j with LangChain, enhancing the performance of large language models (LLMs) with structured, relevant context. 
 
 - Computer vision
   - [Convolutional Neural Networks for Visual Recognition (CS231n)](https://github.com/xingguo01/CS231n): Gained expertise in implementing, training, and debugging convolutional neural networks (CNNs) for image classification and other vision tasks. Developed a deep understanding of cutting-edge research in computer vision and applied multi-million parameter networks to real-world problems.
