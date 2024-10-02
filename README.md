@@ -10,7 +10,7 @@
   - [Natural Languge Processing with Transformers](https://github.com/xingguo01/notebooks) Developed skills in building, debugging, and optimising transformer models for core NLP tasks such as text classification, named entity recognition, and question answering. Applied transformers for cross-lingual transfer learning and real-world scenarios with limited labeled data.
 
 - Computer vision
-  - [Convolutional Neural Networks for Visual Recognition (CS231n)] (https://github.com/xingguo01/CS231n): Gained expertise in implementing, training, and debugging convolutional neural networks (CNNs) for image classification and other vision tasks. Developed a deep understanding of cutting-edge research in computer vision and applied multi-million parameter networks to real-world problems.
+  - [Convolutional Neural Networks for Visual Recognition (CS231n)](https://github.com/xingguo01/CS231n): Gained expertise in implementing, training, and debugging convolutional neural networks (CNNs) for image classification and other vision tasks. Developed a deep understanding of cutting-edge research in computer vision and applied multi-million parameter networks to real-world problems.
 - Reinforcement Learning
   - [David Silver's RL course](https://github.com/xingguo01/DataScienceExercise/tree/main/RL_exercise): covering key concepts such as Markov Decision Processes, dynamic programming, Monte Carlo methods, and temporal difference learning. Developed practical skills in implementing and optimizing reinforcement learning algorithms for various applications, including game playing and robotic control. Gained a deep understanding of policy gradient methods and value function approximation.
   
